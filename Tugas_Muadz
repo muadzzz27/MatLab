@@ -1,1 +1,260 @@
+classdef percobaan2 < matlab.apps.AppBase
 
+    % Properties that correspond to app components
+    properties (Access = public)
+        UIFigure                       matlab.ui.Figure
+        HitungButton                   matlab.ui.control.Button
+        Rekomendasi                    matlab.ui.control.Table
+        Rekomendasi2                   matlab.ui.control.Table
+        NilaiInggrisEditField          matlab.ui.control.EditField
+        NilaiInggrisEditFieldLabel     matlab.ui.control.Label
+        NilaiIndonesiaEditField        matlab.ui.control.EditField
+        NilaiIndonesiaEditFieldLabel   matlab.ui.control.Label
+        NilaiMatematikaEditField       matlab.ui.control.EditField
+        NilaiMatematikaEditFieldLabel  matlab.ui.control.Label
+        AVGSkorUTBKEditField           matlab.ui.control.EditField
+        AVGSkorUTBKEditFieldLabel      matlab.ui.control.Label
+        TestTemuBakatEditField         matlab.ui.control.EditField
+        TestTemuBakatEditFieldLabel    matlab.ui.control.Label
+    end
+
+     methods (Access = private)
+        
+        function hasil= hitungRekomendasi(temuBakat, utbk, matematika, indonesia, inggris)
+            % Fuzzifikasi
+    fuzzTemuBakat = fuzzification(temuBakat, [0 0 30 50; 35 50 65 80; 70 85 100 100]);
+    fuzzUTBK = fuzzification(utbk, [0 0 256 400; 256 450 545 579.5; 545 636.9 800 800]);
+    fuzzMatematika = fuzzification(matematika, [0 0 30 50; 35 50 65 80; 70 80 100 100]);
+    fuzzIndonesia = fuzzification(indonesia, [0 0 30 50; 35 50 65 80; 70 80 100 100]);
+    fuzzInggris = fuzzification(inggris, [0 0 30 50; 35 50 65 80; 70 80 100 100]);
+
+    % Inferensi
+    inferensi = fuzzyInference(fuzzTemuBakat, fuzzUTBK, fuzzMatematika, fuzzIndonesia, fuzzInggris);
+
+    % Defuzzifikasi
+    hasil = defuzzification(inferensi, [0 0 0.45; 0.25 0.5 0.75; 0.55 1 1]);
+        end
+        
+        function fuzzifiedValue = fuzzification(value, mfParams)
+    fuzzifiedValue = zeros(1, size(mfParams, 1));
+    for i = 1:size(mfParams, 1)
+        fuzzifiedValue(i) = trapmf(value, mfParams(i, :));
+    end
+            
+        end
+        
+        function inferenceMatrix = fuzzyInference(fuzzTemuBakat, fuzzUTBK, fuzzMatematika, fuzzIndonesia, fuzzInggris)
+    ruleMatrix = [
+        3 3 3 3 3; 3 3 3 2 3; 3 3 3 1 3; 3 3 2 3 3; 
+3 3 2 2 3; 3 3 2 1 3; 3 3 1 3 3; 3 3 1 2 3; 
+3 3 1 1 2; 3 2 3 3 3; 3 2 3 2 3; 3 2 3 1 3; 
+3 2 2 3 3; 3 2 2 2 3; 3 2 2 1 3; 3 2 1 3 3; 
+3 2 1 2 3; 3 2 1 1 2; 3 1 3 3 3; 3 1 3 2 3; 
+3 1 3 1 2; 3 1 2 3 3; 3 1 2 2 3; 3 1 2 1 2; 
+3 1 1 3 2; 3 1 1 2 2; 3 1 1 1 2; 2 3 3 3 3; 
+2 3 3 2 3; 2 3 3 1 3; 2 3 2 3 3; 2 3 2 2 3; 
+2 3 2 1 3; 2 3 1 3 3; 2 3 1 2 3; 2 3 1 1 3; 
+2 2 3 3 3; 2 2 3 2 3; 2 2 3 1 2; 2 2 2 3 3; 
+2 2 2 2 2; 2 2 2 1 2; 2 2 1 3 3; 2 2 1 2 2; 
+2 2 1 1 2; 2 1 3 3 3; 2 1 3 2 2; 2 1 3 1 2; 
+2 1 2 3 3; 2 1 2 2 2; 2 1 2 1 2; 2 1 1 3 2; 
+2 1 1 2 2; 2 1 1 1 2; 1 3 3 3 1; 1 3 3 2 1; 
+1 3 3 1 1; 1 3 2 3 1; 1 3 2 2 1; 1 3 2 1 1; 
+1 3 1 3 1; 1 3 1 2 1; 1 3 1 1 1; 1 2 3 3 1; 1 2 3 2 1; 
+1 2 3 1 1; 1 2 2 3 1; 1 2 2 2 1; 1 2 2 1 1; 
+1 2 1 3 1; 1 2 1 2 1; 1 2 1 1 1; 1 1 3 3 1; 
+1 1 3 2 1; 1 1 3 1 1; 1 1 2 3 1; 1 1 2 2 1; 
+1 1 2 1 1; 1 1 1 3 1; 1 1 1 2 1; 1 1 1 1 1; 
+3 3 3 3 3; 3 3 3 2 3; 3 3 3 1 3; 3 3 2 3 3; 
+3 3 2 2 3; 3 3 2 1 3; 3 3 1 3 3; 3 3 1 2 3; 
+3 3 1 1 3; 3 2 3 3 3; 3 2 3 2 3; 3 2 3 1 3; 
+3 2 2 3 3; 3 2 2 2 3; 3 2 2 1 3; 3 2 1 3 3; 
+3 2 1 2 3; 3 2 1 1 3; 3 1 3 3 3; 3 1 3 2 3; 
+3 1 3 1 3; 3 1 2 3 3; 3 1 2 2 3; 3 1 2 1 3; 
+3 1 1 3 3; 3 1 1 2 3; 3 1 1 1 2; 2 3 3 3 3; 
+2 3 3 2 2; 2 3 3 1 2; 2 3 2 3 2; 2 3 2 2 2; 
+2 3 2 1 2; 2 3 1 3 2; 2 3 1 2 2; 2 3 1 1 2; 
+2 2 3 3 2; 2 2 3 2 2; 2 2 3 1 2; 2 2 2 3 2; 
+2 2 2 2 2; 2 2 2 1 2; 2 2 1 3 2; 2 2 1 2 2; 
+2 2 1 1 2; 2 1 3 3 2; 2 1 3 2 2; 2 1 3 1 2; 
+2 1 2 3 2; 2 1 2 2 2; 2 1 2 1 2; 2 1 1 3 2; 
+2 1 1 2 2; 2 1 1 1 2; 1 3 3 3 1; 1 3 3 2 1; 
+1 3 3 1 1; 1 3 2 3 1; 1 3 2 2 1; 1 3 2 1 1; 
+1 3 1 3 1; 1 3 1 2 1; 1 3 1 1 1; 1 2 3 3 1; 
+1 2 3 2 1; 1 2 3 1 1; 1 2 2 3 1; 1 2 2 2 1; 
+1 2 2 1 1; 1 2 1 3 1; 1 2 1 2 1; 1 2 1 1 1; 
+1 1 3 3 1; 1 1 3 2 1; 1 1 3 1 1; 1 1 2 3 1; 
+1 1 2 2 1; 1 1 2 1 1; 1 1 1 3 1; 1 1 1 2 1; 
+1 1 1 1 1; 3 3 3 3 2; 3 3 3 2 2; 3 3 3 1 2; 
+3 3 2 3 2; 3 3 2 2 2; 3 3 2 1 2; 3 3 1 3 2; 
+3 3 1 2 2; 3 3 1 1 2; 3 2 3 3 2; 3 2 3 2 2; 
+3 2 3 1 2; 3 2 2 3 2; 3 2 2 2 2; 3 2 2 1 2; 
+3 2 1 3 2; 3 2 1 2 2; 3 2 1 1 1; 3 1 3 3 2; 
+3 1 3 2 2; 3 1 3 1 2; 3 1 2 3 2; 3 1 2 2 2; 
+3 1 2 1 1; 3 1 1 3 2; 3 1 1 2 1; 3 1 1 1 1; 
+2 3 3 3 2; 2 3 3 2 2; 2 3 3 1 1; 2 3 2 3 2; 
+2 3 2 2 2; 2 3 2 1 1; 2 3 1 3 1; 2 3 1 2 1; 
+2 3 1 1 1; 2 2 3 3 2; 2 2 3 2 1; 2 2 3 1 1; 
+2 2 2 3 1; 2 2 2 2 1; 2 2 2 1 1; 2 2 1 3 1; 
+2 2 1 2 1; 2 2 1 1 1; 2 1 3 3 1; 2 1 3 2 1; 
+2 1 3 1 1; 2 1 2 3 1; 2 1 2 2 1; 2 1 2 1 1; 
+2 1 1 3 1; 2 1 1 2 1; 2 1 1 1 1; 1 3 3 3 1; 
+1 3 3 2 1; 1 3 3 1 1; 1 3 2 3 1; 1 3 2 2 1; 
+1 3 2 1 1; 1 3 1 3 1; 1 3 1 2 1; 1 3 1 1 1; 
+1 2 3 3 1; 1 2 3 2 1; 1 2 3 1 1; 1 2 2 3 1; 
+1 2 2 2 1; 1 2 2 1 1; 1 2 1 3 1; 1 2 1 2 1; 
+1 2 1 1 1; 1 1 3 3 1; 1 1 3 2 1; 1 1 3 1 1; 
+1 1 2 3 1; 1 1 2 2 1; 1 1 2 1 1; 1 1 1 3 1; 
+1 1 1 2 1; 1 1 1 1 1; 
+    ];
+
+    inferenceMatrix = zeros(1, size(ruleMatrix, 1));
+
+    for i = 1:size(ruleMatrix, 1)
+        minValues = min([fuzzTemuBakat(ruleMatrix(i, 1)), fuzzUTBK(ruleMatrix(i, 2)), fuzzMatematika(ruleMatrix(i, 3)), fuzzIndonesia(ruleMatrix(i, 4)), fuzzInggris(ruleMatrix(i, 5))]);
+        inferenceMatrix(i) = minValues * ruleMatrix(i, 6);
+    end
+            
+        end
+        
+        function defuzzifiedValue = defuzzification(inferenceMatrix, range)
+    if sum(inferenceMatrix) == 0
+        defuzzifiedValue = 0;
+    else
+        defuzzifiedValue = sum(inferenceMatrix) / sum(inferenceMatrix(inferenceMatrix > 0));
+        % Centroid method for defuzzification
+        defuzzifiedValue = defuzzifiedValue * (range(1) + range(2)) / 2;
+    end
+        end
+    end
+   
+
+    % Callbacks that handle component events
+    methods (Access = private)
+
+        % Button pushed function: HitungButton
+        function Hitung(app, event)
+           % Ambil nilai dari setiap EditField
+        nilaiTemuBakat = str2double(app.TestTemuBakatEditField.Value);
+        nilaiUTBK = str2double(app.AVGSkorUTBKEditField.Value);
+        nilaiMatematika = str2double(app.NilaiMatematikaEditField.Value);
+        nilaiIndonesia = str2double(app.NilaiIndonesiaEditField.Value);
+        nilaiInggris = str2double(app.NilaiInggrisEditField.Value);
+
+        % Lakukan proses fuzzy logic
+        rekomendasi = hitungRekomendasi(nilaiTemuBakat, nilaiUTBK, nilaiMatematika, nilaiIndonesia, nilaiInggris);
+
+        % Tampilkan hasil rekomendasi pada tabel
+        app.Rekomendasi = rekomendasi;
+        end
+    end
+
+    % Component initialization
+    methods (Access = private)
+
+        % Create UIFigure and components
+        function createComponents(app)
+
+            % Create UIFigure and hide until all components are created
+            app.UIFigure = uifigure('Visible', 'off');
+            app.UIFigure.Position = [100 100 665 429];
+            app.UIFigure.Name = 'MATLAB App';
+
+            % Create TestTemuBakatEditFieldLabel
+            app.TestTemuBakatEditFieldLabel = uilabel(app.UIFigure);
+            app.TestTemuBakatEditFieldLabel.HorizontalAlignment = 'right';
+            app.TestTemuBakatEditFieldLabel.Position = [36 368 94 22];
+            app.TestTemuBakatEditFieldLabel.Text = 'Test Temu Bakat';
+
+            % Create TestTemuBakatEditField
+            app.TestTemuBakatEditField = uieditfield(app.UIFigure, 'text');
+            app.TestTemuBakatEditField.Position = [145 368 100 22];
+
+            % Create AVGSkorUTBKEditFieldLabel
+            app.AVGSkorUTBKEditFieldLabel = uilabel(app.UIFigure);
+            app.AVGSkorUTBKEditFieldLabel.HorizontalAlignment = 'right';
+            app.AVGSkorUTBKEditFieldLabel.Position = [267 368 93 22];
+            app.AVGSkorUTBKEditFieldLabel.Text = 'AVG Skor UTBK';
+
+            % Create AVGSkorUTBKEditField
+            app.AVGSkorUTBKEditField = uieditfield(app.UIFigure, 'text');
+            app.AVGSkorUTBKEditField.Position = [375 368 100 22];
+
+            % Create NilaiMatematikaEditFieldLabel
+            app.NilaiMatematikaEditFieldLabel = uilabel(app.UIFigure);
+            app.NilaiMatematikaEditFieldLabel.HorizontalAlignment = 'right';
+            app.NilaiMatematikaEditFieldLabel.Position = [36 326 94 22];
+            app.NilaiMatematikaEditFieldLabel.Text = 'Nilai Matematika';
+
+            % Create NilaiMatematikaEditField
+            app.NilaiMatematikaEditField = uieditfield(app.UIFigure, 'text');
+            app.NilaiMatematikaEditField.Position = [145 326 100 22];
+
+            % Create NilaiIndonesiaEditFieldLabel
+            app.NilaiIndonesiaEditFieldLabel = uilabel(app.UIFigure);
+            app.NilaiIndonesiaEditFieldLabel.HorizontalAlignment = 'right';
+            app.NilaiIndonesiaEditFieldLabel.Position = [276 326 84 22];
+            app.NilaiIndonesiaEditFieldLabel.Text = 'Nilai Indonesia';
+
+            % Create NilaiIndonesiaEditField
+            app.NilaiIndonesiaEditField = uieditfield(app.UIFigure, 'text');
+            app.NilaiIndonesiaEditField.Position = [375 326 100 22];
+
+            % Create NilaiInggrisEditFieldLabel
+            app.NilaiInggrisEditFieldLabel = uilabel(app.UIFigure);
+            app.NilaiInggrisEditFieldLabel.HorizontalAlignment = 'right';
+            app.NilaiInggrisEditFieldLabel.Position = [62 287 68 22];
+            app.NilaiInggrisEditFieldLabel.Text = 'Nilai Inggris';
+
+            % Create NilaiInggrisEditField
+            app.NilaiInggrisEditField = uieditfield(app.UIFigure, 'text');
+            app.NilaiInggrisEditField.Position = [145 287 100 22];
+
+            % Create Rekomendasi2
+            app.Rekomendasi2 = uitable(app.UIFigure);
+            app.Rekomendasi2.ColumnName = {'PGSD'; 'PGPAUD'; 'PMM'; 'RPL'; 'TEKKOM'};
+            app.Rekomendasi2.RowName = {};
+            app.Rekomendasi2.Position = [36 24 563 62];
+
+            % Create Rekomendasi
+            app.Rekomendasi = uitable(app.UIFigure);
+            app.Rekomendasi.ColumnName = {'Rekomendasi'};
+            app.Rekomendasi.RowName = {};
+            app.Rekomendasi.Position = [129 153 302 99];
+
+            % Create HitungButton
+            app.HitungButton = uibutton(app.UIFigure, 'push');
+            app.HitungButton.ButtonPushedFcn = createCallbackFcn(app, @Hitung, true);
+            app.HitungButton.Position = [276 287 100 22];
+            app.HitungButton.Text = 'Hitung';
+
+            % Show the figure after all components are created
+            app.UIFigure.Visible = 'on';
+        end
+    end
+
+    % App creation and deletion
+    methods (Access = public)
+
+        % Construct app
+        function app = percobaan2
+
+            % Create UIFigure and components
+            createComponents(app)
+
+            % Register the app with App Designer
+            registerApp(app, app.UIFigure)
+
+            if nargout == 0
+                clear app
+            end
+        end
+
+        % Code that executes before app deletion
+        function delete(app)
+
+            % Delete UIFigure when app is deleted
+            delete(app.UIFigure)
+        end
+    end
+end
